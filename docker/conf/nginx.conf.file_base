@@ -52,10 +52,8 @@ http {
         mruby_ssl_handshake_handler_code '
             ssl = Nginx::SSL.new
             host = ssl.servername
-            redis = Redis.new ENV["REDIS_HOST"], 6379
-            crt, key = redis.hmget host, "crt", "key"
-            ssl.certificate_data = crt
-            ssl.certificate_key_data = key
+            ssl.certificate = "/etc/ssl/certs/#{host}.crt"
+            ssl.certificate_key = "/etc/ssl/certs/#{host}.key"
         ';
     }
 }
