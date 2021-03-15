@@ -58,3 +58,4 @@ server {
 * デバッグ等で出力したい場合は logger を使おう！
   - `Nginx.errlogger Nginx::LOG_INFO, "foo"`
   - ssl_handler 内では `Nginx::SSL.errlogger Nginx::LOG_NOTICE, "foo"`
+
