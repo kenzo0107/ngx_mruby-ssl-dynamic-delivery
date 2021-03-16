@@ -1,9 +1,8 @@
 env REDIS_HOST;
-env REDIS_URL;
-env DATABASE_URL;
-env DB_NAME;
 
 user daemon;
+daemon off;
+master_process off;
 worker_processes 1;
 error_log stderr;
 
@@ -32,18 +31,11 @@ http {
 
     access_log /usr/local/nginx/logs/access.log ltsv;
 
-    mruby_init_worker /usr/local/nginx/hook/mruby_init_worker.rb;
-    mruby_exit_worker /usr/local/nginx/hook/mruby_exit_worker.rb;
-
     server {
         listen 80;
 
         location /healthcheck {
             mruby_content_handler_code 'Nginx.echo "server ip: #{Nginx::Connection.new.local_ip}: hello ngx_mruby world."';
-        }
-
-        location /mysql-test {
-            mruby_content_handler /usr/local/nginx/hook/mysql_test.rb;
         }
 
         location / {
