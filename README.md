@@ -65,6 +65,32 @@ $ docker-compose exec redis \
 $ docker-compose exec redis redis-cli hmget localhost crt key
 ```
 
+## MySQL 接続
+
+Userdata に接続情報を渡し、再利用する。
+
+* docker/hook/mruby_init_worker.rb
+
+```
+mysql = MySQL::Database.new(db_host, db_user, db_pass, db_name)
+
+if mysql != nil then
+	Userdata.new("mysql_#{Process.pid}").mysql_connection = mysql
+end
+```
+
+* docker/hook/mysql_test.rb
+
+```
+mysql.execute('select * from certs') do |row, fields|
+    puts fields # ["id", "domain", "ssl_crt_key", "crt", ...]
+    puts row # [1, "localhost", "-----BEGIN RSA PRIVATE KEY-----...", "-----BEGIN CERTIFICATE-----...", ...]
+end
+```
+
+※ alpine で mattn/mruby-mysql 使用するには `apk add mariadb-connector-c-dev` が必要です。
+※ build_config.rb で `conf.gem :github => 'mattn/mruby-mysql'` の設定をしている。
+
 ## Findings
 
 * mruby_init_worker で `Nginx.echo` は使用できない。

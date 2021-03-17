@@ -10,6 +10,9 @@ services:
       - 443:443
     environment:
       REDIS_HOST: "redis"
+      REDIS_URL: "redis://redis:6379"
+      DATABASE_URL: "mysql2://root:@db"
+      DB_NAME: tmp
     links:
       - redis:redis
 
@@ -20,5 +23,16 @@ services:
     volumes:
        - redis:/data
 
+  db:
+    image: mysql:5.7.29
+    ports:
+      - ${DB_PORT:-3306}:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - ./initial.sql:/docker-entrypoint-initdb.d/initial.sql
+      - db:/var/lib/mysql
+
 volumes:
-  redis: {}
+  redis:
+  db:
