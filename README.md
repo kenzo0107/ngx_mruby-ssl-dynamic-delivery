@@ -6,9 +6,15 @@ ngx_mruby でローカル環境で動的証明書配信を試験する。
 [高集積マルチテナントWebサーバの大規模証明書管理](https://rand.pepabo.com/papers/iot37-proceeding-matsumotory.pdf)
 
 
-## 前提
+## 事前準備
 
-* localhost ドメインで docker/certs/ 以下に key, crt ファイルを発行済み
+* docker/certs/ ディレクトリ以下に crt, key ファイルを生成する。
+
+```console
+sh crt.sh localhost
+```
+
+localhost.crt を git に push すると git さんに怒られるので生成お願いします。
 
 ## 設定例1. 証明書ファイルを動的読み込み
 
