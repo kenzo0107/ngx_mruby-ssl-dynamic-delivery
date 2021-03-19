@@ -4,9 +4,7 @@ MRuby::Build.new do |conf|
 
   conf.gembox 'full-core'
 
-  #
   # Recommended for ngx_mruby
-  #
   conf.gem :github => 'iij/mruby-env'
   conf.gem :github => 'iij/mruby-dir'
   conf.gem :github => 'iij/mruby-digest'
