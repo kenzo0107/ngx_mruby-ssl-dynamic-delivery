@@ -24,6 +24,5 @@ WORKDIR /usr/local/nginx
 
 COPY docker/conf/nginx.conf conf/nginx.conf
 COPY docker/hook hook
-COPY docker/certs/* /etc/ssl/certs/
 
 CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]

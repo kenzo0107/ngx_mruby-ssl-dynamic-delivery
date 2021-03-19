@@ -1,0 +1,31 @@
+name: build test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Run build tests
+        id: build-image
+        env:
+          DOCKER_BUILDKIT: 1
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --cache-from=kenzo0107/ngx_mruby:latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t kenzo0107/ngx_mruby:$IMAGE_TAG -t kenzo0107/ngx_mruby:latest .

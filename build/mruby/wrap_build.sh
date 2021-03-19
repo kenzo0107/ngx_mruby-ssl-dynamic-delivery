@@ -2,7 +2,7 @@
 
 set -xe
 
-/bin/cp -f /config/mruby/build_config.rb ./
+/bin/cp -f /build/mruby/build_config.rb ./
 ./configure --with-ngx-src-root=../nginx-$NGINX_VER
 
 make build_mruby -j 2
