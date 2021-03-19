@@ -1,3 +1,5 @@
+[![build test](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml)
+
 ## 目的
 ngx_mruby でローカル環境で動的証明書配信を試験する。
 
@@ -11,10 +13,11 @@ ngx_mruby でローカル環境で動的証明書配信を試験する。
 * docker/certs/ ディレクトリ以下に crt, key ファイルを生成する。
 
 ```console
+sh crt.sh dummy
 sh crt.sh localhost
 ```
 
-localhost.crt を git に push すると git さんに怒られるので生成お願いします。
+.crt を git に push すると git さんに怒られるので生成お願いします。
 
 ## 設定例1. 証明書ファイルを動的読み込み
 
@@ -97,6 +100,31 @@ end
 ※ alpine で mattn/mruby-mysql 使用するには `apk add mariadb-connector-c-dev` が必要です。
 ※ build_config.rb で `conf.gem :github => 'mattn/mruby-mysql'` の設定をしている。
 
+## ヘルスチェック
+
+AWS ELB を想定したヘルスチェックです。
+User-Agent に ELB-HealthChecker からのアクセスの場合は、ヘルスチェックを通す。
+
+```console
+$ curl -v -H "User-Agent: ELB-HealthChecker" "http://localhost/healthcheck"
+
+...
+> User-Agent: ELB-HealthChecker
+>
+< HTTP/1.1 200 OK
+...
+```
+
+`User-Agent: ELB-HealthChecker` がない場合、443 へリダイレクトする。
+
+```console
+$ curl -v "http://localhost/healthcheck"
+
+...
+< HTTP/1.1 301 Moved Permanently
+...
+```
+
 ## Findings
 
 * mruby_init_worker で `Nginx.echo` は使用できない。
@@ -106,3 +134,4 @@ end
 * デバッグ等で出力したい場合は logger を使おう！
   - `Nginx.errlogger Nginx::LOG_INFO, "foo"`
   - ssl_handler 内では `Nginx::SSL.errlogger Nginx::LOG_NOTICE, "foo"`
+* [通常の ruby の gem](rubygems.org) は利用できない。
