@@ -1,6 +1,21 @@
+db_url = ENV["DATABASE_URL"]
+db_name = ENV["DB_NAME"]
+# NOTE: DATABASE_URL = mysql2://user:password@host である想定
+m = db_url.match(%r{mysql[0-9]?://(.+):(.+)?@([a-z0-9.-]+)/?(.+)?})
+db_user = m[1]
+db_pass = m[2]
+db_pass = "" if db_pass.nil?
+db_host = m[3]
+
+mysql = MySQL::Database.new(db_host, db_user, db_pass, db_name)
+
+if mysql != nil then
+	Userdata.new("mysql_#{Process.pid}").mysql_connection = mysql
+end
+
 mysql = Userdata.new("mysql_#{Process.pid}").mysql_connection
 
-# NOTE: redis へのコネクションが切断されている場合、接続する
+# NOTE: mysql へのコネクションが切断されている場合、接続する
 if mysql == nil then
     Nginx.errlogger Nginx::LOG_INFO, "trying to connect to mysql"
     db_url = ENV["DATABASE_URL"]
