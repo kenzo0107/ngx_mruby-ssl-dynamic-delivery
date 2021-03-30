@@ -1,24 +1,38 @@
-redis = Userdata.new("redis_#{Process.pid}").redis_connection
+class SslHandshakeHandler
+    def initialize
+      @ssl = Nginx::SSL.new
+      @domain = @ssl.servername
+    end
 
-# NOTE: redis へのコネクションが切断されている場合、接続する
-if redis == nil then
-    Nginx.errlogger Nginx::LOG_INFO, "trying to connect to redis"
-    redis_url = ENV["REDIS_URL"]
-    redis_host, redis_port = redis_url[/^redis?:\/\/(.+)/, 1].split(":")
-    redis = Redis.new redis_host, redis_port.to_i
-    Userdata.new("redis_#{Process.pid}").redis_connection = redis
+    def get_crt_and_key(domain)
+        redis = Userdata.new("redis_#{Process.pid}").redis_connection
+        crt, key = redis.hmget domain, 'crt', 'key'
+    end
+
+    def subdomain_default_domain?
+        d = @domain.split('.')
+        d.delete_at(0)
+        d = d.join('.')
+        d.eql?(ENV['DEFAULT_DOMAIN'])
+    end
+
+    def set_crt_and_key
+        domain = @domain
+
+        # NOTE: デフォルトドメインのサブドメインである場合、
+        #       デフォルトドメインのワイルドカード CRT, Key 情報を取得する
+        if subdomain_default_domain?
+            domain = ENV['DEFAULT_DOMAIN']
+        end
+        crt, key = get_crt_and_key(domain)
+        if crt.nil? or key.nil?
+            Nginx::SSL.errlogger Nginx::LOG_NOTICE, "crt, key of servername #{domain} are invalid."
+            Nginx.return Nginx::HTTP_NOT_FOUND
+        end
+
+        @ssl.certificate_data = crt
+        @ssl.certificate_key_data = key
+    end
 end
 
-ssl = Nginx::SSL.new
-Nginx::SSL.errlogger Nginx::LOG_NOTICE, "Servername is #{ssl.servername}"
-crt, key = redis.hmget ssl.servername, 'crt', 'key'
-
-if crt.empty? || key.empty? then
-    # TODO: redis に登録されていない場合、DB を参照する
-    #       DB に登録されていない場合は、エラー発生させ、処理を停止させる
-
-    Nginx.return Nginx::HTTP_NOT_FOUND
-end
-
-ssl.certificate_data = crt
-ssl.certificate_key_data = key
+SslHandshakeHandler.new.set_crt_and_key
