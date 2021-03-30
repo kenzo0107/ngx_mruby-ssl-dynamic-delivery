@@ -58,7 +58,11 @@ http {
 }
 ```
 
-* Redis にデータ登録
+* [matsumoto-r/mruby-redis](https://github.com/matsumoto-r/mruby-redis) は TLS サポートしていない。
+* `REDIS_URL = redis://<redis host>:6379` の様にスキーマ込みで渡したい所だったが、未対応。
+
+
+### ローカル開発環境で Redis にデータ登録
 
 ```
 $ docker-compose exec redis \
@@ -71,7 +75,9 @@ $ docker-compose exec redis redis-cli hmget localhost crt key
 
 Userdata に接続情報を渡し、再利用する。
 
-* docker/hook/mruby_init_worker.rb
+DB のコネクション数でスケールしづらい可能性があるので
+`mruby_init_worker` で mysql connection の設定をするのはやめておく。
+examples/mysql.rb に設定例を残しておく。
 
 ```
 mysql = MySQL::Database.new(db_host, db_user, db_pass, db_name)
