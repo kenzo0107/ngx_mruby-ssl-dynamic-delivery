@@ -8,7 +8,7 @@ RUN mkdir /usr/local/src
 ADD build /build
 
 WORKDIR /usr/local/src
-RUN apk add --update openssl-dev curl file wget mariadb-connector-c-dev \
+RUN apk add --update openssl-dev curl file wget \
     && apk add --virtual build-deps build-base openssl git ruby-rake bison perl \
     && curl -L https://github.com/cubicdaiya/nginx-build/releases/download/v$NGINX_BUILD/nginx-build-linux-amd64-$NGINX_BUILD.tar.gz -o nginx-build.tar.gz \
     && tar xvzf nginx-build.tar.gz \
