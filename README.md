@@ -12,6 +12,35 @@ ngx_mruby でローカル環境で動的証明書配信を試験する。
 
 Dockerfile ビルド時に dummy.crt, dummy.key が生成され、イメージに含まれる。
 
+## 開発環境の構築
+
+### 1. 環境に必要なツールのインストール
+
+- [dip](https://github.com/bibendi/dip)
+
+### 2. プロビジョニング
+
+```console
+dip provision
+```
+
+開発で使用する `*.localhost` ワイルドカード証明書の localhost.crt, localhost.key を作成し redis に登録します。
+
+### 3. /etc/hosts 設定
+
+```
+127.0.0.1 aaa.localhost bbb.localhost
+```
+
+aaa.localhost, bbb.localhost を 127.0.0.1 に向ける。
+証明書の動的配信の動作確認用に設定しています。
+
+### 4. serverの起動
+
+```console
+dc up -d
+```
+
 ## 設定例1. 証明書ファイルを動的読み込み
 
 ```
@@ -61,16 +90,6 @@ http {
 * [matsumoto-r/mruby-redis](https://github.com/matsumoto-r/mruby-redis) は TLS サポートしていない。
 * `REDIS_URL = redis://<redis host>:6379` の様にスキーマ込みで渡したい所だったが、未対応。
 
-
-### ローカル開発環境で Redis にデータ登録
-
-```
-$ docker-compose exec redis \
-  redis-cli hmset localhost crt "$(cat docker/certs/localhost.crt)" \
-  key "$(cat docker/certs/localhost.key)"
-$ docker-compose exec redis redis-cli hmget localhost crt key
-```
-
 ## MySQL 接続
 
 Userdata に接続情報を渡し、再利用する。
@@ -87,7 +106,7 @@ if mysql != nil then
 end
 ```
 
-* docker/hook/mysql_test.rb
+* examples/mysql.rb
 
 ```
 mysql.execute('select * from certs') do |row, fields|
