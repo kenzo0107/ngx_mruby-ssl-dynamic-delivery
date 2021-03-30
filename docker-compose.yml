@@ -2,6 +2,7 @@ version: '3'
 
 services:
   nginx:
+    container_name: nginx
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,14 +10,17 @@ services:
       - 80:80
       - 443:443
     environment:
+      DEFAULT_DOMAIN: 'localhost'
       REDIS_HOST: 'redis'
     links:
       - redis:redis
     volumes:
       - ./docker/certs:/etc/ssl/certs
+      - ./docker/hook:/usr/local/nginx/hook
 
   redis:
     image: redis:alpine
+    container_name: redis
     ports:
       - ${REDIS_PORT:-6379}:6379
     volumes:
