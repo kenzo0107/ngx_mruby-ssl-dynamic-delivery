@@ -1,0 +1,21 @@
+version: '6.1'
+
+compose:
+  files:
+    - docker-compose.yml
+
+interaction:
+  bash:
+    description: Open the Bash shell in nginx's container
+    service: nginx
+    command: bash
+
+  'redis-cli':
+    description: Run Redis console
+    service: redis
+    command: redis-cli -h redis
+
+provision:
+  - sh crt.sh localhost
+  - dip compose up -d redis
+  - dip redis-cli hmset localhost crt "$(cat docker/certs/localhost.crt)" key "$(cat docker/certs/localhost.key)"
