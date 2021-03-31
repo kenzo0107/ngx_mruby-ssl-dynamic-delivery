@@ -12,8 +12,6 @@ services:
       REDIS_HOST: 'redis'
     links:
       - redis:redis
-    volumes:
-      - ./docker/certs:/etc/ssl/certs
 
   redis:
     image: redis:alpine
