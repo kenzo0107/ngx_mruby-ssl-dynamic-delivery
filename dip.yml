@@ -18,4 +18,7 @@ interaction:
 provision:
   - sh crt.sh localhost
   - dip compose up -d redis
-  - dip redis-cli hmset localhost crt "$(cat docker/certs/localhost.crt)" key "$(cat docker/certs/localhost.key)"
+  - |
+    dip redis-cli hmset localhost \
+      crt "$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.crt)" \
+      key "$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.key)"
