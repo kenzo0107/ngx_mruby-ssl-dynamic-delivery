@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: development
     ports:
       - 80:80
       - 443:443
