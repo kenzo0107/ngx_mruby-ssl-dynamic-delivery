@@ -29,7 +29,7 @@ http {
                     'upstream_cache_status:$upstream_cache_status\t'
                     'upstream_response_time:$upstream_response_time';
 
-    access_log /usr/local/nginx/logs/access.log ltsv;
+    access_log /etc/nginx/logs/access.log ltsv;
 
     server {
         listen 80;
@@ -39,7 +39,7 @@ http {
         }
 
         location / {
-            root /usr/local/nginx/html;
+            root /etc/nginx/html;
             index index.html;
         }
     }
