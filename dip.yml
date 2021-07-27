@@ -22,6 +22,7 @@ interaction:
 
 provision:
   - sh crt.sh localhost
+  - sh crt.sh example.com
 
   # DynamoDB にデータ登録
   - dip compose up -d dynamodb-local
@@ -40,6 +41,12 @@ provision:
       --table-name Certificates \
       --item '{
         "domain": {"S": "*.localhost"},
-        "state": {"N": "1"},
         "crt": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.crt)"'"},
         "key": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.key)"'"} }'
+  - |
+    aws dynamodb put-item --endpoint-url http://localhost:8000 \
+      --table-name Certificates \
+      --item '{
+        "domain": {"S": "foo.example.com"},
+        "crt": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/example.com.crt)"'"},
+        "key": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/example.com.key)"'"} }'

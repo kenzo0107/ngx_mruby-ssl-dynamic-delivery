@@ -1,6 +1,7 @@
 [![Test](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/test.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/test.yml) [![Lint](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/lint.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/lint.yml)
 
 ## 本リポジトリの目的
+
 ngx_mruby でローカル環境で動的証明書配信を試験する。
 
 以下論文の p4 にある設定例を参考に検証する。
@@ -19,16 +20,13 @@ ngx_mruby でローカル環境で動的証明書配信を試験する。
 ```console
 dip provision
 ```
-
-開発で使用する `*.localhost` ワイルドカード証明書の localhost.crt, localhost.key を作成し redis に登録します。
-
 ### 3. /etc/hosts 設定
 
 ```console
-echo "127.0.0.1 aaa.localhost bbb.localhost" | sudo tee -a /etc/hosts
+echo "127.0.0.1 aaa.localhost bbb.localhost foo.example.com" | sudo tee -a /etc/hosts
 ```
 
-aaa.localhost, bbb.localhost を 127.0.0.1 に向ける。
+各開発環境で利用するドメインを 127.0.0.1 に向ける。
 
 ### 4. serverの起動
 
@@ -41,3 +39,18 @@ docker-compose up -d
 ```console
 dip test
 ```
+
+## curl でアクセス
+
+```console
+$ curl -k https://aaa.localhost
+aaa.localhost
+
+$ curl -k https://bbb.localhost
+bbb.localhost
+
+$ curl -k https://foo.example.com
+foo.example.com
+```
+
+各ドメインで証明書を動的に読み込みし、ドメイン名を返すことが確認できる。
