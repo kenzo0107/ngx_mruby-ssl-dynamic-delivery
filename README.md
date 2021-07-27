@@ -1,4 +1,4 @@
-[![build test](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml)
+[![build test](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/build_test.yml) [![Lint](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/lint.yml/badge.svg)](https://github.com/kenzo0107/ngx_mruby-ssl-dynamic-delivery/actions/workflows/lint.yml)
 
 ## 本リポジトリの目的
 ngx_mruby でローカル環境で動的証明書配信を試験する。
