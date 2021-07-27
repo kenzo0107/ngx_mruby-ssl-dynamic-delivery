@@ -35,3 +35,9 @@ aaa.localhost, bbb.localhost を 127.0.0.1 に向ける。
 ```console
 docker-compose up -d
 ```
+
+## テスト実行
+
+```console
+dip test
+```
