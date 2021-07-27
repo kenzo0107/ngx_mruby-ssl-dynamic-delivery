@@ -1,0 +1,85 @@
+name: Test
+
+on: push
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  # NOTE: docker-compose 向けに BuildKit を有効化
+  # see: https://www.docker.com/blog/faster-builds-in-compose-thanks-to-buildkit-support/
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.ref }}-${{ github.sha }}
+            ${{ github.ref }}
+            refs/head/main
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ap-northeast-1
+
+      - name: Provision
+        run: |
+          sh crt.sh localhost
+
+          docker-compose up -d dynamodb-local
+          aws dynamodb create-table --endpoint-url http://localhost:8000 \
+            --table-name Certificates \
+            --attribute-definitions \
+            AttributeName=domain,AttributeType=S \
+            --key-schema AttributeName=domain,KeyType=HASH \
+            --provisioned-throughput ReadCapacityUnits=10,WriteCapacityUnits=10
+          aws dynamodb put-item --endpoint-url http://localhost:8000 \
+            --table-name Certificates \
+            --item '{
+              "domain": {"S": "*.localhost"},
+              "crt": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.crt)"'"},
+              "key": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.key)"'"} }'
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: ENVIRONMENT=development
+          builder: ${{ steps.buildx.outputs.name }}
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          outputs: type=docker # GitHub Actions 上のローカルに build し、以降 step でイメージを参照できる様にする
+          tags: ngx_mruby-ssl-dynamic-delivery_nginx:latest
+
+      - name: Test ruby scripts
+        id: test
+        run: |
+          # Redis にデータがなく DynamoDB から値を取得し、 Redis にキャッシュするテスト
+          docker-compose run --rm nginx mruby hook/test.rb > test_result_dynamodb
+          # Redis からデータを取得するテスト
+          docker-compose run --rm nginx mruby hook/test.rb > test_result_redis
+          cat test_result_dynamodb test_result_redis > test_result
+          echo "::set-output name=error_count::$(grep failures test_result | awk '{s += $5+$7} END {print s}')"
+
+      - name: exit when test error occured
+        if: steps.test.outputs.error_count > 0
+        run: exit 1
+
+      - name: Test nginx development configuration
+        run: |
+          docker run --rm ngx_mruby-ssl-dynamic-delivery_nginx:latest /etc/nginx/sbin/nginx -t

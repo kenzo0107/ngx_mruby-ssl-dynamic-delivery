@@ -1,5 +1,5 @@
 # see: https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
-name: build
+name: push
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
   DOCKER_BUILDKIT: 1
 
 jobs:
-  build:
+  push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

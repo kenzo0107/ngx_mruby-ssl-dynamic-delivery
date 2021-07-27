@@ -5,20 +5,41 @@ compose:
     - docker-compose.yml
 
 interaction:
-  bash:
-    description: Open the Bash shell in nginx's container
+  sh:
+    description: Open the shell in nginx's container
     service: nginx
-    command: bash
+    command: sh
 
   'redis-cli':
     description: Run Redis console
     service: redis
     command: redis-cli -h redis
 
+  test:
+    description: Run Rspec commands
+    service: nginx
+    command: mruby hook/test.rb
+
 provision:
   - sh crt.sh localhost
-  - dip compose up -d redis
+
+  # DynamoDB にデータ登録
+  - dip compose up -d dynamodb-local
   - |
-    dip redis-cli hmset localhost \
-      crt \""$(awk 'NF {sub(/\r/, ""); printf "%s\n",$0;}' certs/localhost.crt)"\" \
-      key \""$(awk 'NF {sub(/\r/, ""); printf "%s\n",$0;}' certs/localhost.key)"\"
+    aws dynamodb delete-table --endpoint-url http://localhost:8000 \
+      --table-name Certificates; true
+  - |
+    aws dynamodb create-table --endpoint-url http://localhost:8000 \
+    --table-name Certificates \
+    --attribute-definitions \
+    AttributeName=domain,AttributeType=S \
+    --key-schema AttributeName=domain,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=10,WriteCapacityUnits=10
+  - |
+    aws dynamodb put-item --endpoint-url http://localhost:8000 \
+      --table-name Certificates \
+      --item '{
+        "domain": {"S": "*.localhost"},
+        "state": {"N": "1"},
+        "crt": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.crt)"'"},
+        "key": {"S": "'"$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' certs/localhost.key)"'"} }'
