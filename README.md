@@ -24,12 +24,11 @@ dip provision
 
 ### 3. /etc/hosts 設定
 
-```
-127.0.0.1 aaa.localhost bbb.localhost
+```console
+echo "127.0.0.1 aaa.localhost bbb.localhost" | sudo tee -a /etc/hosts
 ```
 
 aaa.localhost, bbb.localhost を 127.0.0.1 に向ける。
-証明書の動的配信の動作確認用に設定しています。
 
 ### 4. serverの起動
 
