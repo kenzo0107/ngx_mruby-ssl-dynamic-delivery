@@ -1,3 +1,4 @@
 # frozen_string_literal: true
 
-Userdata.new("redis_#{Process.pid}").client.close
+redis = Userdata.new("redis_#{Process.pid}").redis_connection
+redis&.close
