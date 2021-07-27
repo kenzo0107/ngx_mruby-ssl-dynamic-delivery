@@ -1,26 +1,16 @@
-class RedisClient
-    def initialize
-        if ENV["REDIS_HOST"].nil?
-            p "mruby_init_worker: failed to connect to redis. ENV['REDIS_HOST'] is nil."
-            Nginx.return Nginx::HTTP_NOT_FOUND
-        end
-        @redis_host = ENV["REDIS_HOST"]
-    end
+# frozen_string_literal: true
 
-    def connect
-        redis = Redis.new @redis_host, 6379
-    end
-
-    def set_redis_connection_to_user_data
-        redis = connect
-        Userdata.new("redis_#{Process.pid}").redis_connection = redis unless redis.nil?
-    end
-
-    def close
-        redis = Userdata.new("redis_#{Process.pid}").redis_connection
-        redis.close unless redis.nil?
-    end
+if ENV['REDIS_HOST'].nil?
+  m = 'mruby_init_worker: failed to connect to redis. ENV[REDIS_HOST] is nil.'
+  Nginx.errlogger Nginx::LOG_NOTICE, m
+  Nginx.return Nginx::HTTP_NOT_FOUND
 end
 
-Userdata.new("redis_#{Process.pid}").client = RedisClient.new
-Userdata.new("redis_#{Process.pid}").client.set_redis_connection_to_user_data
+begin
+  redis = Redis.new ENV['REDIS_HOST'], 6379
+rescue StandardError => e
+  p e.message
+end
+
+# スクリプト間のデータ渡しは Userdata を利用する
+Userdata.new("redis_#{Process.pid}").redis_connection = redis unless redis.nil?
