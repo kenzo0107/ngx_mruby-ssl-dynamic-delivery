@@ -1,0 +1,3 @@
+# コメントに日本語を許容する
+Style/AsciiComments:
+  Enabled: false
