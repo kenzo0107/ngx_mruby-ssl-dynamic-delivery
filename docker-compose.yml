@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: development
     ports:
       - 80:80
       - 443:443
@@ -14,9 +16,6 @@ services:
       REDIS_HOST: 'redis'
     links:
       - redis:redis
-    volumes:
-      - ./docker/certs:/etc/ssl/certs
-      - ./docker/hook:/usr/local/nginx/hook
 
   redis:
     image: redis:alpine

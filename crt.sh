@@ -1,5 +1,5 @@
 #!/bin/sh
-readonly DIR=docker/certs
+readonly DIR=certs
 
 NAME=$1
 
