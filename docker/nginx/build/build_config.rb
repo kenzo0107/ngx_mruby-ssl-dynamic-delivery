@@ -21,12 +21,17 @@ MRuby::Build.new do |conf|
   conf.gem github: 'matsumoto-r/mruby-mutex' # mutex class for mruby
   # HttpRequest of iij/mruby support mruby/mruby using mruby-uv and mruby-http
   conf.gem github: 'matsumoto-r/mruby-httprequest'
-
-  # test for mruby
-  conf.gem github: 'iij/mruby-mtest'
-  conf.enable_test
+  conf.gem github: 'mattn/mruby-curl' # mruby wrapper for libcurl
 
   # ngx_mruby extended class
   conf.gem './mrbgems/ngx_mruby_mrblib'
   conf.gem './mrbgems/rack-based-api'
+
+  if %w[development test].include?(ENV['ENVIRONMENT'])
+    # テストで利用する
+    conf.gem github: 'iij/mruby-mtest'
+    enable_debug
+    conf.enable_bintest
+    conf.enable_test
+  end
 end
