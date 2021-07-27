@@ -1,0 +1,24 @@
+name: Lint
+
+on: push
+
+jobs:
+  rubocop-auto-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0.1
+
+      - name: rubocop
+        uses: reviewdog/action-rubocop@v1
+        with:
+          rubocop_version: 1.13
+          rubocop_extensions: rubocop-performance:1.5.1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_on_error: true
