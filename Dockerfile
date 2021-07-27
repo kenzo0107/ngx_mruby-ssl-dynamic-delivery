@@ -51,6 +51,8 @@ COPY docker/nginx/conf/nginx.conf conf/nginx.conf
 COPY docker/nginx/conf/conf.d/${ENVIRONMENT}.conf conf/conf.d/default.conf
 COPY docker/nginx/hook hook
 
+RUN ln -sf /dev/stdout /etc/nginx/logs/access.log
+
 EXPOSE 80 443
 
 CMD ["/etc/nginx/sbin/nginx", "-g", "daemon off;"]
