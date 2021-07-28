@@ -8,6 +8,17 @@ ngx_mruby でローカル環境で動的証明書配信を試験する。
 
 [高集積マルチテナントWebサーバの大規模証明書管理](https://rand.pepabo.com/papers/iot37-proceeding-matsumotory.pdf)
 
+## 構成図
+
+![](logo.png)
+
+1. ngx_mruby で SSL/TLS ハンドシェイク時にドメインを元に Redis から証明書(crt), 秘密鍵(key) を取得
+    - Redis に存在しない場合は DynamoDB から取得し、 Redis にキャッシュ登録
+2. 取得した crt, key を元に SSL/TLS ハンドシェイク
+3. ngx_mruby でアクセスしたドメイン名を返す
+
+簡易的に ngx_mruby を用いた証明書の動的読み込みを体験できる様な構成にしています。
+
 
 ## 開発環境の構築
 
